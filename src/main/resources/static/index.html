@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NightOwl 🦉</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        nav {
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e1e2e;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; }
+        .logo span { color: #a78bfa; }
+
+        .hero {
+            text-align: center;
+            padding: 5rem 2rem 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span { color: #a78bfa; }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #9ca3af;
+            max-width: 500px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .upload-box {
+            background: #1a1a2e;
+            border: 2px dashed #a78bfa;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-box:hover { background: #1e1e38; }
+
+        .upload-box p { color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem; }
+
+        .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        textarea {
+            width: 100%;
+            background: #1a1a2e;
+            border: 1px solid #2e2e4e;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #ffffff;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            margin-top: 1rem;
+        }
+
+        textarea:focus { outline: none; border-color: #a78bfa; }
+
+        .options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+
+        .option-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            border: 2px solid #2e2e4e;
+            background: transparent;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover, .option-btn.active {
+            border-color: #a78bfa;
+            color: #a78bfa;
+            background: #1e1e38;
+        }
+
+        .generate-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 1rem 3rem;
+            background: #a78bfa;
+            color: #0f0f1a;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .generate-btn:hover { background: #9061f9; transform: scale(1.03); }
+
+        .or-divider {
+            text-align: center;
+            color: #4b5563;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        #result {
+            max-width: 600px;
+            margin: 2rem auto;
+            display: none;
+        }
+
+        .flashcard {
+            background: #1a1a2e;
+            border: 1px solid #2e2e4e;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .flashcard .question {
+            color: #a78bfa;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .flashcard .answer { color: #d1d5db; }
+
+        .loading {
+            text-align: center;
+            color: #a78bfa;
+            padding: 2rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Night<span>Owl</span> 🦉</div>
+    <div style="color: #9ca3af; font-size: 0.9rem;">Study smarter, not harder</div>
+</nav>
+
+<div class="hero">
+    <h1>Turn your notes into<br><span>exam-ready content</span></h1>
+    <p>Upload your PPTs, PDFs or paste your notes — get flashcards, quizzes or short notes instantly.</p>
+    <p id="fileName" style="color: #a78bfa; margin-top: 0.5rem; font-weight: 600;"></p>
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📎</div>
+        <strong>Click to upload PDF or PPT</strong>
+        <p>Support for PDF, PPT, PPTX files</p>
+        <input type="file" id="fileInput" hidden accept=".pdf,.ppt,.pptx"
+        onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''">
+    </div>
+
+    <div class="or-divider">— or paste your notes below —</div>
+
+    <div style="max-width: 600px; margin: 0 auto;">
+        <textarea id="notesInput" placeholder="Paste your notes here..."></textarea>
+    </div>
+
+    <div class="options">
+        <button class="option-btn active" onclick="selectOption(this, 'flashcards')">🃏 Flashcards</button>
+        <button class="option-btn" onclick="selectOption(this, 'quiz')">📝 Quiz</button>
+        <button class="option-btn" onclick="selectOption(this, 'shortnotes')">📋 Short Notes</button>
+    </div>
+
+    <button class="generate-btn" onclick="generate()">Generate ✨</button>
+
+    <div class="loading" id="loading">🦉 NightOwl is thinking...</div>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    let selectedOption = 'flashcards';
+
+function selectOption(btn, option) {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedOption = option;
+}
+
+async function generate() {
+    const notes = document.getElementById('notesInput').value.trim();
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!notes && !file) {
+        alert('Please paste some notes or upload a file first!');
+        return;
+    }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('result').innerHTML = '';
+
+    try {
+        let data;
+
+        if (file) {
+            // File upload path
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', selectedOption);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            data = await response.json();
+
+        } else {
+            // Text paste path
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes: notes, type: selectedOption })
+            });
+            data = await response.json();
+        }
+
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        displayResult(data);
+
+    } catch (err) {
+        alert('Something went wrong. Please try again!');
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
+function displayResult(data) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.style.display = 'block';
+
+    if (selectedOption === 'flashcards' && data.flashcards) {
+        resultDiv.innerHTML = data.flashcards.map((card, i) => `
+            <div class="flashcard">
+                <div class="question">Q${i+1}: ${card.question}</div>
+                <div class="answer">A: ${card.answer}</div>
+            </div>
+        `).join('');
+
+    } else if (selectedOption === 'quiz' && data.quiz) {
+        resultDiv.innerHTML = data.quiz.map((q, i) => `
+            <div class="flashcard">
+                <div class="question">Q${i+1}: ${q.question}</div>
+                <div style="margin-top: 0.5rem;">
+                    ${q.options.map(opt => `
+                        <div style="padding: 0.4rem 0; color: #d1d5db;">${opt}</div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 0.5rem; color: #a78bfa; font-weight: 600;">
+                    Answer: ${q.answer}
+                </div>
+            </div>
+        `).join('');
+
+    } else if (selectedOption === 'shortnotes' && data.result) {
+        resultDiv.innerHTML = `
+            <div class="flashcard">
+                <div class="answer" style="white-space: pre-line;">${data.result}</div>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = `
+            <div class="flashcard">
+                <div class="answer">${JSON.stringify(data)}</div>
+            </div>
+        `;
+    }
+}
+</script>
+
+</body>
+</html>
