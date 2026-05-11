@@ -1,305 +1,964 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NightOwl 🦉</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NightOwl 🦉 — AI Study Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070f;
+  --surface: #0f0f1c;
+  --surface2: #14142a;
+  --surface3: #1a1a35;
+  --border: rgba(255,255,255,0.07);
+  --border-purple: rgba(167,139,250,0.25);
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --blue: #2563eb;
+  --pink: #db2777;
+  --text: #f0eeff;
+  --text-sec: rgba(240,238,255,0.55);
+  --text-dim: rgba(240,238,255,0.3);
+  --text-ghost: rgba(240,238,255,0.18);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0f0f1a;
-            color: #ffffff;
-            min-height: 100vh;
-        }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        nav {
-            padding: 1.2rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1e1e2e;
-        }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-        .logo { font-size: 1.5rem; font-weight: 700; }
-        .logo span { color: #a78bfa; }
+/* ─── BACKGROUND ─── */
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 10%, rgba(124,58,237,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 90% 60%, rgba(37,99,235,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 250px at 50% 90%, rgba(219,39,119,0.06) 0%, transparent 70%);
+}
 
-        .hero {
-            text-align: center;
-            padding: 5rem 2rem 3rem;
-        }
+.grid-layer {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 80%);
+}
 
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
+.content { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
 
-        .hero h1 span { color: #a78bfa; }
+/* ─── NAVBAR ─── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,7,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 100%;
+}
 
-        .hero p {
-            font-size: 1.1rem;
-            color: #9ca3af;
-            max-width: 500px;
-            margin: 0 auto 2.5rem;
-        }
+.nav-inner {
+  width: 100%; max-width: 680px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
 
-        .upload-box {
-            background: #1a1a2e;
-            border: 2px dashed #a78bfa;
-            border-radius: 16px;
-            padding: 3rem 2rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+.logo {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Syne', sans-serif;
+}
 
-        .upload-box:hover { background: #1e1e38; }
+.logo-owl { font-size: 18px; animation: owlBob 3s ease-in-out infinite; }
+@keyframes owlBob {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
 
-        .upload-box p { color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem; }
+.logo-text {
+  font-size: 15px; font-weight: 800;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
 
-        .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+.logo-badge {
+  font-size: 9px; padding: 2px 7px; border-radius: 20px;
+  background: var(--purple-dim); border: 1px solid var(--border-purple);
+  color: var(--purple-light); font-weight: 600; letter-spacing: 0.05em;
+}
 
-        textarea {
-            width: 100%;
-            background: #1a1a2e;
-            border: 1px solid #2e2e4e;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #ffffff;
-            font-size: 0.95rem;
-            resize: vertical;
-            min-height: 120px;
-            font-family: inherit;
-            margin-top: 1rem;
-        }
+.nav-right { display: flex; align-items: center; gap: 10px; }
 
-        textarea:focus { outline: none; border-color: #a78bfa; }
+.nav-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; color: var(--text-dim);
+}
 
-        .options {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 2rem auto;
-            max-width: 600px;
-        }
+.status-dot {
+  width: 5px; height: 5px; background: #22c55e;
+  border-radius: 50%; animation: pulse 2s infinite;
+}
 
-        .option-btn {
-            padding: 0.7rem 1.5rem;
-            border-radius: 50px;
-            border: 2px solid #2e2e4e;
-            background: transparent;
-            color: #9ca3af;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+}
 
-        .option-btn:hover, .option-btn.active {
-            border-color: #a78bfa;
-            color: #a78bfa;
-            background: #1e1e38;
-        }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.nav-avatar:hover { transform: scale(1.08); box-shadow: 0 0 12px rgba(124,58,237,0.5); }
 
-        .generate-btn {
-            display: block;
-            margin: 0 auto;
-            padding: 1rem 3rem;
-            background: #a78bfa;
-            color: #0f0f1a;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+/* ─── HERO ─── */
+.hero {
+  text-align: center;
+  padding: 32px 24px 24px;
+  animation: fadeUp 0.6s ease both;
+}
 
-        .generate-btn:hover { background: #9061f9; transform: scale(1.03); }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-        .or-divider {
-            text-align: center;
-            color: #4b5563;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-        }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 20px;
+  background: var(--purple-dim); border: 1px solid var(--border-purple);
+  color: #c4b5fd; font-size: 11px; font-weight: 500;
+  margin-bottom: 14px;
+}
 
-        #result {
-            max-width: 600px;
-            margin: 2rem auto;
-            display: none;
-        }
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 800; line-height: 1.15;
+  margin-bottom: 10px; letter-spacing: -0.03em;
+}
 
-        .flashcard {
-            background: #1a1a2e;
-            border: 1px solid #2e2e4e;
-            border-radius: 12px;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 1rem;
-        }
+.grad { background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #f472b6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .flashcard .question {
-            color: #a78bfa;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+.hero-sub { font-size: 13px; color: var(--text-sec); line-height: 1.6; margin-bottom: 14px; }
 
-        .flashcard .answer { color: #d1d5db; }
+.trust-row {
+  display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 4px;
+}
 
-        .loading {
-            text-align: center;
-            color: #a78bfa;
-            padding: 2rem;
-            display: none;
-        }
-    </style>
+.trust-item { font-size: 10px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+
+/* ─── MAIN CARD ─── */
+.main-card {
+  margin: 0 16px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+
+/* ─── UPLOAD BOX ─── */
+.upload-box {
+  border: 2px dashed rgba(167,139,250,0.2);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  background: rgba(124,58,237,0.03);
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative; overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.upload-box::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(124,58,237,0.08), transparent 70%);
+  opacity: 0; transition: opacity var(--transition);
+}
+
+.upload-box:hover { border-color: rgba(167,139,250,0.45); transform: translateY(-1px); }
+.upload-box:hover::before { opacity: 1; }
+.upload-box.drag-over { border-color: var(--purple-light); background: rgba(124,58,237,0.08); box-shadow: 0 0 24px rgba(124,58,237,0.2); }
+
+.upload-formats { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
+
+.fmt {
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+}
+
+.fmt-pdf { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+.fmt-docx { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+.fmt-txt { background: var(--purple-dim); border: 1px solid var(--border-purple); color: var(--purple-light); }
+
+.upload-icon-wrap {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: var(--purple-dim); border: 1px solid var(--border-purple);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px; font-size: 20px;
+  transition: transform var(--transition);
+}
+.upload-box:hover .upload-icon-wrap { transform: scale(1.08) rotate(-3deg); }
+
+.upload-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 3px; }
+.upload-sub { font-size: 11px; color: var(--text-dim); }
+
+#fileName {
+  display: none; margin-top: 8px;
+  padding: 4px 12px; background: var(--purple-dim);
+  border-radius: 20px; color: var(--purple-light);
+  font-size: 11px; font-weight: 500;
+}
+#fileName.visible { display: inline-block; }
+
+.upload-privacy {
+  position: absolute; bottom: 8px; right: 10px;
+  font-size: 10px; color: var(--text-ghost);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ─── DIVIDER ─── */
+.divider {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px; color: var(--text-ghost); font-size: 11px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── TEXTAREA ─── */
+textarea {
+  width: 100%; font-family: 'DM Sans', sans-serif;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(167,139,250,0.18);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--text); font-size: 13px;
+  resize: none; min-height: 90px;
+  line-height: 1.6; transition: all var(--transition);
+  box-shadow: 0 0 0 3px rgba(167,139,250,0.04), inset 0 1px 0 rgba(255,255,255,0.03);
+  margin-bottom: 16px;
+  field-sizing: content;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: rgba(167,139,250,0.45);
+  background: rgba(167,139,250,0.05);
+  box-shadow: 0 0 0 3px rgba(167,139,250,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+textarea::placeholder { color: var(--text-ghost); }
+
+/* ─── OUTPUT TYPE ─── */
+.section-label {
+  font-size: 10px; color: var(--text-dim);
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 8px;
+}
+
+.options { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+
+.option-btn {
+  padding: 12px 8px; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text-dim); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'DM Sans', sans-serif;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+
+.option-btn .opt-icon { font-size: 18px; transition: transform var(--transition); }
+.option-btn .opt-sub { font-size: 9px; color: var(--text-ghost); font-weight: 400; }
+
+.option-btn:hover {
+  border-color: rgba(167,139,250,0.35);
+  color: rgba(255,255,255,0.7);
+  background: rgba(167,139,250,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.12);
+}
+.option-btn:hover .opt-icon { transform: scale(1.15); }
+
+.option-btn.active {
+  border-color: var(--purple);
+  background: rgba(124,58,237,0.14);
+  color: #c4b5fd;
+  box-shadow: 0 0 0 1px rgba(124,58,237,0.3), 0 4px 20px rgba(124,58,237,0.18);
+}
+.option-btn.active .opt-sub { color: rgba(167,139,250,0.5); }
+
+/* ─── GENERATE BUTTON ─── */
+.generate-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: white; border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  font-family: 'DM Sans', sans-serif;
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(124,58,237,0.35);
+  letter-spacing: -0.01em;
+}
+
+.generate-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0; transition: opacity var(--transition);
+}
+.generate-btn:hover::after { opacity: 1; }
+.generate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,58,237,0.5); }
+.generate-btn:active { transform: translateY(0) scale(0.99); box-shadow: 0 2px 12px rgba(124,58,237,0.3); }
+.generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-hint { text-align: center; font-size: 10px; color: var(--text-ghost); margin-top: 7px; }
+
+/* ─── LOADING ─── */
+.loading { display: none; padding: 32px 0; text-align: center; }
+
+.loading-steps { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+.loading-step {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--text-dim);
+  transition: all 0.3s ease;
+}
+
+.loading-step.active { color: var(--purple-light); }
+.loading-step.done { color: rgba(34,197,94,0.7); }
+
+.step-icon {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.loading-step.active .step-icon {
+  border-color: var(--purple-light);
+  background: var(--purple-dim);
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-step.done .step-icon {
+  border-color: rgba(34,197,94,0.4);
+  background: rgba(34,197,94,0.1);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── RESULTS ─── */
+.results { display: none; margin-top: 0; }
+
+.results-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 14px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.results-title-group {}
+.results-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.results-subtitle { font-size: 11px; color: var(--text-dim); }
+
+.results-meta { display: flex; align-items: center; gap: 6px; }
+
+.badge {
+  font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 500;
+}
+.badge-purple { background: var(--purple-dim); color: var(--purple-light); }
+.badge-green { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+.export-btn {
+  padding: 5px 12px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  font-size: 11px; color: var(--text-sec); cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all var(--transition);
+}
+.export-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+/* ─── FLASHCARDS ─── */
+.flashcard {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all var(--transition);
+  opacity: 0; transform: translateY(8px);
+  animation: cardIn 0.4s ease forwards;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.flashcard:hover {
+  border-color: rgba(167,139,250,0.3);
+  transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(124,58,237,0.1), -2px 0 0 rgba(124,58,237,0.4);
+}
+
+@keyframes cardIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-header {
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex; gap: 10px; align-items: flex-start;
+  user-select: none;
+}
+
+.q-num {
+  background: var(--purple-dim); color: var(--purple-light);
+  border-radius: 6px; padding: 2px 8px;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.q-text { font-size: 13px; font-weight: 600; color: #e2d9ff; line-height: 1.45; flex: 1; }
+
+.card-toggle {
+  flex-shrink: 0; width: 22px; height: 22px;
+  border-radius: 6px; background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-dim);
+  transition: all var(--transition); margin-top: 1px;
+}
+
+.flashcard.revealed .card-toggle { background: var(--purple-dim); border-color: var(--border-purple); color: var(--purple-light); }
+
+.card-answer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.35s ease;
+  padding: 0 16px;
+}
+
+.flashcard.revealed .card-answer { max-height: 300px; padding-bottom: 14px; }
+
+.answer-inner {
+  background: rgba(124,58,237,0.06);
+  border-radius: 10px; padding: 12px 14px;
+  border-left: 2px solid rgba(167,139,250,0.35);
+}
+
+.answer-label {
+  font-size: 9px; color: rgba(167,139,250,0.6);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; margin-bottom: 6px;
+}
+
+.answer-text { font-size: 12px; color: var(--text-sec); line-height: 1.65; }
+
+.card-tags { padding: 0 16px 12px; display: flex; gap: 5px; flex-wrap: wrap; }
+.tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(167,139,250,0.07); color: rgba(167,139,250,0.55); border: 1px solid rgba(167,139,250,0.12); }
+
+.card-meta { padding: 0 16px 12px; display: flex; gap: 6px; }
+.diff { font-size: 9px; padding: 2px 7px; border-radius: 6px; font-weight: 600; }
+.diff-easy { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+.diff-med { background: rgba(234,179,8,0.1); color: #fbbf24; border: 1px solid rgba(234,179,8,0.2); }
+.diff-hard { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+/* ─── NAVIGATION ─── */
+.card-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding: 10px 14px;
+  background: var(--surface2); border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.card-nav-info { font-size: 11px; color: var(--text-dim); }
+
+.nav-btns { display: flex; gap: 6px; }
+
+.nav-btn {
+  padding: 5px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+  font-size: 11px; color: var(--text-sec); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all var(--transition);
+}
+.nav-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.nav-btn.primary { background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.3); color: #c4b5fd; }
+.nav-btn.primary:hover { background: rgba(124,58,237,0.28); }
+
+/* ─── QUIZ ─── */
+.quiz-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px; margin-bottom: 8px;
+  opacity: 0; transform: translateY(8px);
+  animation: cardIn 0.4s ease forwards;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.quiz-card:hover { border-color: rgba(167,139,250,0.25); box-shadow: 0 4px 16px rgba(124,58,237,0.08); }
+
+.quiz-q { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 10px; }
+.quiz-q-text { font-size: 13px; font-weight: 600; color: #e2d9ff; line-height: 1.4; }
+
+.quiz-options { padding-left: 0; }
+.quiz-opt { font-size: 12px; color: var(--text-sec); padding: 6px 10px; border-radius: 8px; transition: background var(--transition); }
+.quiz-opt:hover { background: rgba(255,255,255,0.03); }
+
+.quiz-answer-badge {
+  margin-top: 8px; display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  background: rgba(167,139,250,0.1); color: var(--purple-light);
+  font-size: 11px; font-weight: 600;
+}
+
+/* ─── SHORT NOTES ─── */
+.notes-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  font-size: 13px; color: var(--text-sec);
+  line-height: 1.85; white-space: pre-line;
+  opacity: 0; animation: cardIn 0.4s ease 0.1s forwards;
+}
+
+/* ─── SHIMMER ─── */
+.shimmer {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px; height: 14px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.shimmer-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 8px;
+}
+.shimmer-card .shimmer:nth-child(1) { width: 60%; margin-bottom: 8px; }
+.shimmer-card .shimmer:nth-child(2) { width: 90%; height: 10px; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 480px) {
+  .main-card { margin: 0 10px 20px; padding: 16px; }
+  .hero { padding: 24px 16px 16px; }
+  .hero h1 { font-size: 22px; }
+  nav { padding: 0 14px; }
+  .nav-status { display: none; }
+  .trust-row { gap: 10px; }
+  .options { gap: 6px; }
+  .option-btn { padding: 10px 6px; font-size: 10px; }
+  textarea { min-height: 80px; }
+  .generate-btn { padding: 13px; font-size: 13px; }
+  .card-header { padding: 12px 14px; }
+  .q-text { font-size: 12px; }
+  .answer-text { font-size: 11px; }
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.25); border-radius: 4px; }
+</style>
 </head>
 <body>
 
+<div class="bg-layer"></div>
+<div class="grid-layer"></div>
+
 <nav>
-    <div class="logo">Night<span>Owl</span> 🦉</div>
-    <div style="color: #9ca3af; font-size: 0.9rem;">Study smarter, not harder</div>
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-owl">🦉</span>
+      <span class="logo-text">NightOwl</span>
+      <span class="logo-badge">BETA</span>
+    </div>
+    <div class="nav-right">
+      <div class="nav-status">
+        <div class="status-dot"></div>
+        Files auto-deleted
+      </div>
+      <div class="nav-avatar" title="Profile">N</div>
+    </div>
+  </div>
 </nav>
 
-<div class="hero">
-    <h1>Turn your notes into<br><span>exam-ready content</span></h1>
-    <p>Upload your PPTs, PDFs or paste your notes — get flashcards, quizzes or short notes instantly.</p>
-    <p id="fileName" style="color: #a78bfa; margin-top: 0.5rem; font-weight: 600;"></p>
-    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon">📎</div>
-        <strong>Click to upload PDF or PPT</strong>
-        <p>Support for PDF, PPT, PPTX files</p>
-        <input type="file" id="fileInput" hidden accept=".pdf,.ppt,.pptx"
-        onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''">
+<div class="content">
+  <div class="hero">
+    <div class="hero-badge">✨ AI-powered exam prep for CS students</div>
+    <h1>Ready to ace your exams?<br><span class="grad">We've got you covered.</span></h1>
+    <p class="hero-sub">Upload PDFs or paste notes — get flashcards, quizzes or short notes in seconds.</p>
+    <div class="trust-row">
+      <span class="trust-item">⚡ 10,000+ flashcards generated</span>
+      <span class="trust-item">📚 Used by CS students</span>
+      <span class="trust-item">🔒 Private & secure</span>
+    </div>
+  </div>
+
+  <div class="main-card">
+
+    <div class="upload-box" id="uploadBox"
+         onclick="document.getElementById('fileInput').click()"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <div class="upload-formats">
+        <span class="fmt fmt-pdf">PDF</span>
+        <span class="fmt fmt-docx">DOCX</span>
+        <span class="fmt fmt-txt">TXT</span>
+      </div>
+      <div class="upload-icon-wrap">📎</div>
+      <div class="upload-title">Drop your file here</div>
+      <div class="upload-sub">or click to browse · Max 50MB</div>
+      <span id="fileName"></span>
+      <div class="upload-privacy">🔒 Private</div>
+      <input type="file" id="fileInput" hidden accept=".pdf,.docx,.txt"
+             onchange="handleFileSelect(this)">
     </div>
 
-    <div class="or-divider">— or paste your notes below —</div>
+    <div class="divider">or paste notes</div>
 
-    <div style="max-width: 600px; margin: 0 auto;">
-        <textarea id="notesInput" placeholder="Paste your notes here..."></textarea>
-    </div>
+    <textarea id="notesInput"
+              placeholder="Paste your lecture notes, textbook content, or study material here..."
+              oninput="autoResize(this)"></textarea>
+
+    <div class="section-label">What do you want to generate?</div>
 
     <div class="options">
-        <button class="option-btn active" onclick="selectOption(this, 'flashcards')">🃏 Flashcards</button>
-        <button class="option-btn" onclick="selectOption(this, 'quiz')">📝 Quiz</button>
-        <button class="option-btn" onclick="selectOption(this, 'shortnotes')">📋 Short Notes</button>
+      <button class="option-btn active" onclick="selectOption(this,'flashcards')">
+        <span class="opt-icon">🃏</span>
+        Flashcards
+        <span class="opt-sub">Active recall</span>
+      </button>
+      <button class="option-btn" onclick="selectOption(this,'quiz')">
+        <span class="opt-icon">📝</span>
+        Quiz
+        <span class="opt-sub">Test yourself</span>
+      </button>
+      <button class="option-btn" onclick="selectOption(this,'shortnotes')">
+        <span class="opt-icon">📋</span>
+        Short Notes
+        <span class="opt-sub">Quick revision</span>
+      </button>
     </div>
 
-    <button class="generate-btn" onclick="generate()">Generate ✨</button>
+    <button class="generate-btn" id="generateBtn" onclick="generate()">
+      Generate with AI ✨
+    </button>
+    <div class="btn-hint">⚡ Usually takes 2–5 seconds</div>
 
-    <div class="loading" id="loading">🦉 NightOwl is thinking...</div>
+    <div class="loading" id="loading">
+      <div class="loading-steps">
+        <div class="loading-step" id="step1">
+          <div class="step-icon">◌</div>
+          <span>Analyzing notes…</span>
+        </div>
+        <div class="loading-step" id="step2">
+          <div class="step-icon">◌</div>
+          <span>Extracting key concepts…</span>
+        </div>
+        <div class="loading-step" id="step3">
+          <div class="step-icon">◌</div>
+          <span>Generating content…</span>
+        </div>
+      </div>
+    </div>
 
-    <div id="result"></div>
+    <div class="results" id="results">
+      <div class="results-header">
+        <div class="results-title-group">
+          <div class="results-title" id="resultsTitle">Flashcards</div>
+          <div class="results-subtitle" id="resultsSubtitle"></div>
+        </div>
+        <div class="results-meta">
+          <span class="badge badge-green" id="timeBadge"></span>
+          <span class="badge badge-purple" id="countBadge"></span>
+          <button class="export-btn" onclick="exportResults()">Export</button>
+        </div>
+      </div>
+      <div id="resultContent"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-    let selectedOption = 'flashcards';
+let selectedOption = 'flashcards';
+let currentCards = [];
+let currentCardIndex = 0;
+let startTime;
 
 function selectOption(btn, option) {
-    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedOption = option;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedOption = option;
+}
+
+function handleFileSelect(input) {
+  const file = input.files[0];
+  const el = document.getElementById('fileName');
+  if (file) {
+    el.textContent = '📎 ' + file.name;
+    el.classList.add('visible');
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadBox').classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('uploadBox').classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadBox').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('fileInput').files = dt.files;
+    const el = document.getElementById('fileName');
+    el.textContent = '📎 ' + file.name;
+    el.classList.add('visible');
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.max(90, el.scrollHeight) + 'px';
+}
+
+function showLoadingSteps() {
+  const steps = ['step1','step2','step3'];
+  const delays = [0, 900, 1800];
+  steps.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'loading-step';
+    el.querySelector('.step-icon').textContent = '◌';
+    setTimeout(() => {
+      if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+      if (document.getElementById(steps[i-1])) document.getElementById(steps[i-1]).querySelector('.step-icon').textContent = '✓';
+      el.className = 'loading-step active';
+    }, delays[i]);
+  });
 }
 
 async function generate() {
-    const notes = document.getElementById('notesInput').value.trim();
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
+  const notes = document.getElementById('notesInput').value.trim();
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
 
-    if (!notes && !file) {
-        alert('Please paste some notes or upload a file first!');
-        return;
+  if (!notes && !file) { alert('Please paste some notes or upload a file first!'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('resultContent').innerHTML = '';
+  showLoadingSteps();
+
+  startTime = Date.now();
+
+  try {
+    let data;
+
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', selectedOption);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      data = await res.json();
+    } else {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes, type: selectedOption })
+      });
+      data = await res.json();
     }
 
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('result').style.display = 'none';
-    document.getElementById('result').innerHTML = '';
+    if (data.error) { alert('Error: ' + data.error); return; }
 
-    try {
-        let data;
+    await new Promise(r => setTimeout(r, 2400));
+    document.getElementById('step3').className = 'loading-step done';
+    document.getElementById('step3').querySelector('.step-icon').textContent = '✓';
+    await new Promise(r => setTimeout(r, 300));
 
-        if (file) {
-            // File upload path
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('type', selectedOption);
+    displayResult(data);
 
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            data = await response.json();
+  } catch (err) {
+    alert('Something went wrong. Please try again!');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'Generate with AI ✨';
+  }
+}
 
-        } else {
-            // Text paste path
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ notes: notes, type: selectedOption })
-            });
-            data = await response.json();
-        }
+const difficulties = ['Easy','Medium','Hard'];
+const tagSets = {
+  flashcards: [['#Concept','#Core'],['#Important','#Exam'],['#Theory','#Key'],['#DSA','#Algorithms']],
+  quiz: [['#MCQ','#Practice'],['#Test'],['#Exam','#Core']],
+  shortnotes: []
+};
 
-        if (data.error) {
-            alert('Error: ' + data.error);
-            return;
-        }
+function getDiff() {
+  const d = difficulties[Math.floor(Math.random()*3)];
+  return `<span class="diff diff-${d==='Easy'?'easy':d==='Medium'?'med':'hard'}">${d}</span>`;
+}
 
-        displayResult(data);
-
-    } catch (err) {
-        alert('Something went wrong. Please try again!');
-    } finally {
-        document.getElementById('loading').style.display = 'none';
-    }
+function getTags(type, i) {
+  const sets = tagSets[type] || [];
+  const tags = sets[i % sets.length] || [];
+  return tags.map(t => `<span class="tag">${t}</span>`).join('');
 }
 
 function displayResult(data) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.style.display = 'block';
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  const results = document.getElementById('results');
+  const content = document.getElementById('resultContent');
+  results.style.display = 'block';
 
-    if (selectedOption === 'flashcards' && data.flashcards) {
-        resultDiv.innerHTML = data.flashcards.map((card, i) => `
-            <div class="flashcard">
-                <div class="question">Q${i+1}: ${card.question}</div>
-                <div class="answer">A: ${card.answer}</div>
-            </div>
-        `).join('');
+  document.getElementById('timeBadge').textContent = `✓ Done in ${elapsed}s`;
 
-    } else if (selectedOption === 'quiz' && data.quiz) {
-        resultDiv.innerHTML = data.quiz.map((q, i) => `
-            <div class="flashcard">
-                <div class="question">Q${i+1}: ${q.question}</div>
-                <div style="margin-top: 0.5rem;">
-                    ${q.options.map(opt => `
-                        <div style="padding: 0.4rem 0; color: #d1d5db;">${opt}</div>
-                    `).join('')}
-                </div>
-                <div style="margin-top: 0.5rem; color: #a78bfa; font-weight: 600;">
-                    Answer: ${q.answer}
-                </div>
-            </div>
-        `).join('');
+  if (selectedOption === 'flashcards' && data.flashcards) {
+    currentCards = data.flashcards;
+    document.getElementById('resultsTitle').textContent = 'Flashcards';
+    document.getElementById('resultsSubtitle').textContent = `${currentCards.length} cards generated`;
+    document.getElementById('countBadge').textContent = `${currentCards.length} cards`;
 
-    } else if (selectedOption === 'shortnotes' && data.result) {
-        resultDiv.innerHTML = `
-            <div class="flashcard">
-                <div class="answer" style="white-space: pre-line;">${data.result}</div>
-            </div>
-        `;
-    } else {
-        resultDiv.innerHTML = `
-            <div class="flashcard">
-                <div class="answer">${JSON.stringify(data)}</div>
-            </div>
-        `;
+    content.innerHTML = currentCards.map((card, i) => `
+      <div class="flashcard" id="card${i}" style="animation-delay:${i*0.06}s" onclick="toggleCard(${i})">
+        <div class="card-header">
+          <span class="q-num">Q${i+1}</span>
+          <span class="q-text">${card.question}</span>
+          <div class="card-toggle">▼</div>
+        </div>
+        <div class="card-answer">
+          <div class="answer-inner">
+            <div class="answer-label">Answer</div>
+            <div class="answer-text">${card.answer}</div>
+          </div>
+        </div>
+        <div class="card-meta">${getDiff()}</div>
+        <div class="card-tags">${getTags('flashcards', i)}</div>
+      </div>
+    `).join('');
+
+    if (currentCards.length > 1) {
+      content.innerHTML += `
+        <div class="card-nav">
+          <span class="card-nav-info">Card 1 of ${currentCards.length}</span>
+          <div class="nav-btns">
+            <button class="nav-btn" onclick="prevCard()">← Prev</button>
+            <button class="nav-btn primary" onclick="nextCard()">Next →</button>
+          </div>
+        </div>
+      `;
     }
+
+  } else if (selectedOption === 'quiz' && data.quiz) {
+    document.getElementById('resultsTitle').textContent = 'Quiz';
+    document.getElementById('resultsSubtitle').textContent = `${data.quiz.length} questions generated`;
+    document.getElementById('countBadge').textContent = `${data.quiz.length} questions`;
+
+    content.innerHTML = data.quiz.map((q, i) => `
+      <div class="quiz-card" style="animation-delay:${i*0.06}s">
+        <div class="quiz-q">
+          <span class="q-num">Q${i+1}</span>
+          <span class="quiz-q-text">${q.question}</span>
+        </div>
+        <div class="quiz-options">
+          ${(q.options||[]).map(opt => `<div class="quiz-opt">${opt}</div>`).join('')}
+        </div>
+        <div class="quiz-answer-badge">✓ ${q.answer}</div>
+      </div>
+    `).join('');
+
+  } else if (selectedOption === 'shortnotes' && data.result) {
+    document.getElementById('resultsTitle').textContent = 'Short Notes';
+    document.getElementById('resultsSubtitle').textContent = 'Key concepts summarised';
+    document.getElementById('countBadge').textContent = 'Summary';
+    content.innerHTML = `<div class="notes-card">${data.result}</div>`;
+
+  } else {
+    content.innerHTML = `<div class="notes-card">${JSON.stringify(data)}</div>`;
+  }
+
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleCard(i) {
+  const card = document.getElementById('card'+i);
+  card.classList.toggle('revealed');
+  currentCardIndex = i;
+  updateNavInfo();
+}
+
+function updateNavInfo() {
+  const info = document.querySelector('.card-nav-info');
+  if (info) info.textContent = `Card ${currentCardIndex+1} of ${currentCards.length}`;
+}
+
+function nextCard() {
+  if (currentCardIndex < currentCards.length - 1) {
+    document.getElementById('card'+currentCardIndex).classList.remove('revealed');
+    currentCardIndex++;
+    const next = document.getElementById('card'+currentCardIndex);
+    next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateNavInfo();
+  }
+}
+
+function prevCard() {
+  if (currentCardIndex > 0) {
+    document.getElementById('card'+currentCardIndex).classList.remove('revealed');
+    currentCardIndex--;
+    const prev = document.getElementById('card'+currentCardIndex);
+    prev.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    updateNavInfo();
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === ' ') { e.preventDefault(); toggleCard(currentCardIndex); }
+});
+
+function exportResults() {
+  let text = '';
+  if (selectedOption === 'flashcards') {
+    text = currentCards.map((c,i) => `Q${i+1}: ${c.question}\nA: ${c.answer}`).join('\n\n');
+  }
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nightowl-flashcards.txt';
+  a.click();
 }
 </script>
-
 </body>
 </html>
